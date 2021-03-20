@@ -9,7 +9,7 @@ public class Main
     public static void main(String[] args) throws Exception
     {
         try {
-            String fileName = System.getenv("test");  /// Fuck this program!!!
+            String fileName = System.getenv("fileName");  /// Fuck this program!!!
             String[] temp = fileName.split("\\.");
             if (fileName.equals("") || !temp[1].equals("csv"))
                 throw new FileNotFoundException();

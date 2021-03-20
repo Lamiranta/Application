@@ -7,19 +7,18 @@ import de.ifmo.Product.Product;
 
 import java.io.*;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.NoSuchElementException;
 
 public class Collection implements InfoCommands, ConsoleCommands, ElementCommands
 {
     private Hashtable<Integer, Product> hashtable;
-    private java.time.LocalDate createDate;
+    private final java.time.LocalDate createDate;
 
-    public Collection(Product... product)
+    public Collection()
     {
         this.createDate = LocalDate.now();
-        this.hashtable = new Hashtable<Integer, Product>(32,(float) 0.5);
+        this.hashtable = new Hashtable<>();
     }
 
     public Hashtable<Integer, Product> getHashtable() { return this.hashtable; }
@@ -41,30 +40,32 @@ public class Collection implements InfoCommands, ConsoleCommands, ElementCommand
     public void info()
     {
         System.out.println("Type of collection: Hashtable");
-        System.out.println("Initialization date: " + createDate.toString());
-        System.out.println("Size of collection: " + hashtable.size());
+        System.out.println("Initialization date: " + this.createDate.toString());
+        System.out.println("Size of collection: " + getHashtable().size());
     }
 
     @Override
-    public void show() { System.out.println(hashtable.toString()); }
+    public void show() { System.out.println(getHashtable().toString()); }
 
     @Override
     public void clear()
     {
-        this.hashtable.clear();
+        getHashtable().clear();
         System.out.println("The collection was cleared successful!");
     }
 
     @Override
-    public boolean save(File file) throws IOException
+    public boolean save(File file)
     {
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(file);
-            for (Product p : hashtable.values())
+            for (Product p : getHashtable().values())
             {
-                String temp = p.getId() + "," + p.getName() + "," + p.getCoordinates() + "," + p.getCreationDate() + ",";
-                temp += p.getPrice() + "," + p.getManufactureCost() + "," + p.getUnitOfMeasure() + ",";
-                temp += p.getManufacturer() + "\n";
+                String temp = p.getId() + "," + p.getName() + "," + p.getCoordinates().getX() + "," + p.getCoordinates().getY() + ",";
+                temp += p.getCreationDate() + "," + p.getPrice() + ",";
+                temp += p.getManufactureCost() + "," + p.getUnitOfMeasure() + ",";
+                temp += p.getManufacturer().getId() + "," + p.getManufacturer().getName() + "," + p.getManufacturer().getEmployeesCount() + ",";
+                temp += p.getManufacturer().getType() + "," + p.getManufacturer().getPostalAddress() + "\n";
                 byte[] translate = temp.getBytes();
                 fileOutputStream.write(translate);
             }
@@ -78,18 +79,18 @@ public class Collection implements InfoCommands, ConsoleCommands, ElementCommand
     public void history() {}
 
     @Override
-    public void insert(Integer key, Product product) { this.hashtable.put(key,product); }
+    public void insert(Integer key, Product product) { getHashtable().put(key,product); }
 
     @Override
     public boolean updateId(Integer id, Product product)
     {
         boolean doesExist = false;
-        for (Product p : hashtable.values())
+        for (Integer key : getHashtable().keySet())
         {
-            if (p.getId().equals(id))
+            if (getHashtable().get(key).getId().equals(id))
             {
                 doesExist = true;
-                p = product;
+                getHashtable().replace(key,getHashtable().get(key),product);
             }
         }
         if (doesExist)
@@ -105,9 +106,9 @@ public class Collection implements InfoCommands, ConsoleCommands, ElementCommand
     public boolean removeKey(Integer key) throws NoSuchElementException
     {
         try {
-            if (this.hashtable.get(key) == null)
+            if (getHashtable().get(key) == null)
                 throw new NoSuchElementException();
-            else this.hashtable.remove(key);
+            else getHashtable().remove(key);
             return true;
         } catch (NoSuchElementException e) { System.out.println("There is no elements with such key!"); }
         return false;

@@ -33,54 +33,44 @@ public class Product
 
     public void setName(String name) throws NullPointerException
     {
-        try {
-            if (name.equals(""))
-                throw new NullPointerException("The product must have a name!");
-            else this.name = name;
-        } catch(NullPointerException e) { System.out.println(e.getMessage()); }
+        if (name.equals(""))
+            throw new NullPointerException("The product must have a name!");
+        else this.name = name;
     }
 
     public void setCoordinates(Coordinates coordinates) throws NullPointerException
     {
-        try {
-            if (coordinates == null)
-                throw new NullPointerException("The product must have coordinates!");
-            else this.coordinates = coordinates;
-        } catch(NullPointerException e) { System.out.println(e.getMessage()); }
+        if (coordinates == null)
+            throw new NullPointerException("The product must have coordinates!");
+        else this.coordinates = coordinates;
     }
 
     public void setPrice(Float price) throws NullPointerException
     {
-        try {
-            if (price == null)
-                throw new NullPointerException("The product must have a price!");
-            else this.price = price;
-        } catch(NullPointerException e) { System.out.println(e.getMessage()); }
+        if (price == null)
+            throw new NullPointerException("The product must have a price!");
+        else this.price = price;
     }
 
     public void setManufactureCost(Integer manufactureCost) throws NullPointerException
     {
-        try {
-            if (manufactureCost == null)
-                throw new NullPointerException("The product must have manufacture cost!");
-            else this.manufactureCost = manufactureCost;
-        } catch(NullPointerException e) { System.out.println(e.getMessage()); }
+        if (manufactureCost == null)
+            throw new NullPointerException("The product must have manufacture cost!");
+        else this.manufactureCost = manufactureCost;
     }
 
     public void setUnitOfMeasure(UnitOfMeasure unitOfMeasure) throws EnumConstantNotPresentException
     {
-        try {
-            if (unitOfMeasure == null) return;
-            for (UnitOfMeasure t : UnitOfMeasure.values())
+        if (unitOfMeasure == null) return;
+        for (UnitOfMeasure t : UnitOfMeasure.values())
+        {
+            if (unitOfMeasure == t)
             {
-                if (unitOfMeasure == t)
-                {
-                    this.unitOfMeasure = unitOfMeasure;
-                    break;
-                }
+                this.unitOfMeasure = unitOfMeasure;
+                break;
             }
-            if (this.unitOfMeasure == null) throw new EnumConstantNotPresentException(unitOfMeasure.getClass(), unitOfMeasure.name());
-        } catch(EnumConstantNotPresentException e) { System.out.println(e.getMessage()); }
+        }
+        if (this.unitOfMeasure == null) throw new EnumConstantNotPresentException(unitOfMeasure.getClass(), unitOfMeasure.name());
     }
 
     public void setManufacturer(Organization manufacturer)

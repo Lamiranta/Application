@@ -17,14 +17,12 @@ public class Coordinates
 
     public void setY(Float y) throws NullPointerException, RangeException
     {
-        try {
-            if (y == null)
-                throw new NullPointerException("The y-coordinate must have a value!");
-            else if (y > 261)
-                throw new RangeException(RangeException.BAD_BOUNDARYPOINTS_ERR, "Invalid Range! The y-coordinate must be less than 262.");
-            else
-                this.y = y;
-        } catch(Exception e) { System.out.println(e.getMessage()); }
+        if (y == null)
+            throw new NullPointerException("The y-coordinate must have a value!");
+        else if (y > 261)
+            throw new RangeException(RangeException.BAD_BOUNDARYPOINTS_ERR, "Invalid Range! The y-coordinate must be less than 262.");
+        else
+            this.y = y;
     }
 
     public long getX() { return this.x; }

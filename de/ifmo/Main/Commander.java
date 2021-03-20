@@ -21,19 +21,18 @@ public class Commander implements ConsoleCommands, ReplaceCommands
 
     public Commander(String fileName)
     {
+        this.commandLog = new String[14];
         this.fileName = fileName;
     }
-
-    public String[] getCommandLog() { return this.commandLog; }
 
     public void addCommandToLog(String command)
     {
         boolean isSaved = false;
-        for (String str : commandLog)
+        for (int i = 0; i < 13; ++i)
         {
-            if (str.equals(""))
+            if (this.commandLog[i].equals(""))
             {
-                str = command;
+                this.commandLog[i] = command;
                 isSaved = true;
                 break;
             }
@@ -47,36 +46,60 @@ public class Commander implements ConsoleCommands, ReplaceCommands
         }
     }
 
-    public Product initializeProduct(BufferedReader br, Product p) throws IOException
+    public Product initializeProduct(BufferedReader br, Product p)
     {
         String[] param;
 
+        while(true) {
+            try {
+                System.out.println("Enter the x-y coordinates:");
+                param = br.readLine().split(" ", -1);
+                Coordinates c = new Coordinates(Integer.parseInt(param[0]), Float.valueOf(param[1]));
+                p.setCoordinates(c);
+                break;
+            } catch(Exception e) { System.out.println(e.getMessage()); }
+        }
 
-        System.out.println("Enter the x-y coordinates:");
-        param = br.readLine().split(" ",-1);
-        Coordinates c = new Coordinates(Integer.parseInt(param[0]), Float.valueOf(param[1]));
-        p.setCoordinates(c);
+        while(true) {
+            try {
+                System.out.println("Enter the price:");
+                p.setPrice(Float.parseFloat(br.readLine()));
+                break;
+            } catch(Exception e) { System.out.println(e.getMessage()); }
+        }
 
-        System.out.println("Enter the price:");
-        p.setPrice(Float.parseFloat(br.readLine()));
+        while(true) {
+            try {
+                System.out.println("Enter the manufacture cost:");
+                p.setManufactureCost(Integer.parseInt(br.readLine()));
+                break;
+            } catch(Exception e) { System.out.println(e.getMessage()); }
+        }
 
-        System.out.println("Enter the manufacture cost:");
-        p.setManufactureCost(Integer.parseInt(br.readLine()));
+        while(true) {
+            try {
+                System.out.println("Enter the unit of measure. The possible variants are: " + Arrays.toString(UnitOfMeasure.values()));
+                p.setUnitOfMeasure(UnitOfMeasure.valueOf(br.readLine()));
+                break;
+            } catch(Exception e) { System.out.println(e.getMessage()); }
+        }
 
-        System.out.println("Enter the unit of measure. The possible variants are: " + Arrays.toString(UnitOfMeasure.values()));
-        p.setUnitOfMeasure(UnitOfMeasure.valueOf(br.readLine()));
+        while(true) {
+            try {
+                System.out.println("Enter the organization name and number of employments:");
+                param = br.readLine().split(" ", -1);
+                Organization org = new Organization(param[0], Integer.parseInt(param[1]));
 
-        System.out.println("Enter the organization name and number of employments:");
-        param = br.readLine().split(" ",-1);
-        Organization org = new Organization(param[0],Integer.parseInt(param[1]));
+                System.out.println("Enter the organization type. The possible variants are: " + Arrays.toString(OrganizationType.values()));
+                org.setType(OrganizationType.valueOf(br.readLine()));
 
-        System.out.println("Enter the organization type. The possible variants are: " + Arrays.toString(OrganizationType.values()));
-        org.setType(OrganizationType.valueOf(br.readLine()));
+                System.out.println("Enter the postal address:");
+                org.setPostalAddress(new Address(br.readLine()));
 
-        System.out.println("Enter the postal address:");
-        param = br.readLine().split(" ",-1);
-        org.setPostalAddress(new Address(param[0]));
-        p.setManufacturer(org);
+                p.setManufacturer(org);
+                break;
+            } catch(Exception e) { System.out.println(e.getMessage()); }
+        }
         return p;
     }
 
@@ -141,6 +164,24 @@ public class Commander implements ConsoleCommands, ReplaceCommands
                     noExceptions = collection.removeKey(Integer.valueOf(commandLine[1]));
                     if(noExceptions) addCommandToLog(commandLine[0]);
                 }
+                case "replace_if_greater":
+                {
+                    Integer key = Integer.valueOf(commandLine[1]);
+                    Product p = new Product();
+                    String name = commandLine[2];
+                    p.setName(name);
+                    p = initializeProduct(br, p);
+                    replaceIfGreater(collection, key, p);
+                }
+                case "replace_if_lower":
+                {
+                    Integer key = Integer.valueOf(commandLine[1]);
+                    Product p = new Product();
+                    String name = commandLine[2];
+                    p.setName(name);
+                    p = initializeProduct(br, p);
+                    replaceIfLower(collection, key, p);
+                }
             }
         }
     }
@@ -149,20 +190,34 @@ public class Commander implements ConsoleCommands, ReplaceCommands
     public void clear() {}
 
     @Override
-    public boolean save(File file) throws IOException { return false; }
+    public boolean save(File file) { return false; }
 
     @Override
     public void history() { System.out.println(Arrays.toString(commandLog)); }
 
     @Override
-    public boolean replaceIfGreater(Integer key) throws NoSuchElementException
+    public boolean replaceIfGreater(Collection collection, Integer key, Product p) throws NoSuchElementException
     {
+        try {
+            Product target = collection.getHashtable().get(key);
+            if (target == null) throw new NoSuchElementException("There is no elements with such key!");
+            else if (target.getPrice() < p.getPrice())
+                collection.getHashtable().replace(key, target, p);
+            return true;
+        } catch(NoSuchElementException e) { System.out.println(e.getMessage()); }
         return false;
     }
 
     @Override
-    public boolean replaceIfLower(Integer key) throws NoSuchElementException
+    public boolean replaceIfLower(Collection collection, Integer key, Product p) throws NoSuchElementException
     {
+        try {
+            Product target = collection.getHashtable().get(key);
+            if (target == null) throw new NoSuchElementException("There is no elements with such key!");
+            else if (target.getPrice() > p.getPrice())
+                collection.getHashtable().replace(key,target,p);
+            return true;
+        } catch(NoSuchElementException e) { System.out.println(e.getMessage()); }
         return false;
     }
 }

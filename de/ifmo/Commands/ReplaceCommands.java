@@ -1,7 +1,10 @@
 package de.ifmo.Commands;
 
+import de.ifmo.Collection.Collection;
+import de.ifmo.Product.Product;
+
 public interface ReplaceCommands
 {
-    public boolean replaceIfGreater(Integer key);
-    public boolean replaceIfLower(Integer key);
+    public boolean replaceIfGreater(Collection collection, Integer key, Product p);
+    public boolean replaceIfLower(Collection collection, Integer key, Product p);
 }
