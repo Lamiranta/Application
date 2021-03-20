@@ -6,6 +6,6 @@ import java.io.IOException;
 public interface ConsoleCommands
 {
     public void clear();
-    public void save(File file) throws IOException;
+    public boolean save(File file) throws IOException;
     public void history();
 }

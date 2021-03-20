@@ -1,6 +1,7 @@
 package de.ifmo.Collection;
 
 import de.ifmo.Commands.ConsoleCommands;
+import de.ifmo.Commands.ElementCommands;
 import de.ifmo.Commands.InfoCommands;
 import de.ifmo.Product.Product;
 
@@ -8,54 +9,32 @@ import java.io.*;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.NoSuchElementException;
 
-public class Collection implements InfoCommands, ConsoleCommands
+public class Collection implements InfoCommands, ConsoleCommands, ElementCommands
 {
-    private Hashtable<String, Product> hashtable;
-    private String[] commandLog;
+    private Hashtable<Integer, Product> hashtable;
     private java.time.LocalDate createDate;
 
     public Collection(Product... product)
     {
         this.createDate = LocalDate.now();
-        this.commandLog = new String[14];
-        this.hashtable = new Hashtable<String, Product>(32,(float) 0.5);
+        this.hashtable = new Hashtable<Integer, Product>(32,(float) 0.5);
     }
 
-    public Hashtable<String, Product> getHashtable() { return this.hashtable; }
-
-    public String[] getCommandLog() { return this.commandLog; }
-
-    public void addCommandToLog(String command)
-    {
-        boolean isSaved = false;
-        for (String str : commandLog)
-        {
-            if (str.equals(""))
-            {
-                str = command;
-                isSaved = true;
-                break;
-            }
-        }
-        if (!isSaved)
-        {
-            String[] temp = new String[14];
-            System.arraycopy(commandLog, 1, temp, 0, 13);
-            temp[13] = command;
-            this.commandLog = temp;
-        }
-    }
+    public Hashtable<Integer, Product> getHashtable() { return this.hashtable; }
 
     @Override
-    public void help()
+    public boolean help()
     {
         File file = new File("\\help.txt"); /// need to change path!
         try (BufferedReader br = new BufferedReader(new FileReader(file)))
         {
             String line;
             while ((line = br.readLine()) != null) System.out.println(line);
+            return true;
         } catch (IOException e) { System.out.println("File 'help' not found!"); }
+        return false;
     }
 
     @Override
@@ -77,7 +56,7 @@ public class Collection implements InfoCommands, ConsoleCommands
     }
 
     @Override
-    public void save(File file) throws IOException
+    public boolean save(File file) throws IOException
     {
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(file);
@@ -90,9 +69,47 @@ public class Collection implements InfoCommands, ConsoleCommands
                 fileOutputStream.write(translate);
             }
             System.out.println("File was saved successful!");
+            return true;
         } catch(IOException e) { System.out.println("Error while writing the file!"); }
+        return false;
     }
 
     @Override
-    public void history() { System.out.println(Arrays.toString(commandLog)); }
+    public void history() {}
+
+    @Override
+    public void insert(Integer key, Product product) { this.hashtable.put(key,product); }
+
+    @Override
+    public boolean updateId(Integer id, Product product)
+    {
+        boolean doesExist = false;
+        for (Product p : hashtable.values())
+        {
+            if (p.getId().equals(id))
+            {
+                doesExist = true;
+                p = product;
+            }
+        }
+        if (doesExist)
+        {
+            System.out.println("The element was successful updated!");
+            return true;
+        }
+        else System.out.println("There is no elements with such id!");
+        return false;
+    }
+
+    @Override
+    public boolean removeKey(Integer key) throws NoSuchElementException
+    {
+        try {
+            if (this.hashtable.get(key) == null)
+                throw new NoSuchElementException();
+            else this.hashtable.remove(key);
+            return true;
+        } catch (NoSuchElementException e) { System.out.println("There is no elements with such key!"); }
+        return false;
+    }
 }

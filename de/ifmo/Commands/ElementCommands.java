@@ -4,7 +4,7 @@ import de.ifmo.Product.Product;
 
 public interface ElementCommands
 {
-    boolean insert(Integer key, Product product);
-    boolean updateId(Integer id, Product product);
-    boolean removeKey(Integer key);
+    public void insert(Integer key, Product product);
+    public boolean updateId(Integer id, Product product);
+    public boolean removeKey(Integer key);
 }

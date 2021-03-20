@@ -10,7 +10,11 @@ public class Organization
     private OrganizationType type;
     private Address postalAddress;
 
-    public Organization() {}
+    public Organization(String name, int employeesCount)
+    {
+        setName(name);
+        setEmployeesCount(employeesCount);
+    }
 
     public int getId() { return this.id; }
     public String getName() { return this.name; }

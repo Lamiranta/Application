@@ -5,7 +5,7 @@ import de.ifmo.Product.Product;
 
 public interface InfoCommands
 {
-    public void help();
+    public boolean help();
     public void info();
     public void show();
 }

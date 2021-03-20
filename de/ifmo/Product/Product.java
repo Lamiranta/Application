@@ -16,9 +16,8 @@ public class Product
     private UnitOfMeasure unitOfMeasure;
     private Organization manufacturer;
 
-    public Product(Organization manufacturer)
+    public Product()
     {
-        this.manufacturer = manufacturer;
         this.creationDate = LocalDate.now();
         this.id = creationDate.hashCode();
     }
@@ -68,11 +67,10 @@ public class Product
         } catch(NullPointerException e) { System.out.println(e.getMessage()); }
     }
 
-    public void setUnitOfMeasure(UnitOfMeasure unitOfMeasure) throws NullPointerException, EnumConstantNotPresentException
+    public void setUnitOfMeasure(UnitOfMeasure unitOfMeasure) throws EnumConstantNotPresentException
     {
         try {
-            if (unitOfMeasure == null)
-                throw new NullPointerException("The product must have a unit of measure!");
+            if (unitOfMeasure == null) return;
             for (UnitOfMeasure t : UnitOfMeasure.values())
             {
                 if (unitOfMeasure == t)
@@ -82,6 +80,11 @@ public class Product
                 }
             }
             if (this.unitOfMeasure == null) throw new EnumConstantNotPresentException(unitOfMeasure.getClass(), unitOfMeasure.name());
-        } catch(Exception e) { System.out.println(e.getMessage()); }
+        } catch(EnumConstantNotPresentException e) { System.out.println(e.getMessage()); }
+    }
+
+    public void setManufacturer(Organization manufacturer)
+    {
+        this.manufacturer = manufacturer;
     }
 }
