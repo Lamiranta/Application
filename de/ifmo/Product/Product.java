@@ -1,7 +1,6 @@
 package de.ifmo.Product;
 
 import de.ifmo.Organization.Organization;
-import de.ifmo.Organization.OrganizationType;
 
 import java.time.LocalDate;
 

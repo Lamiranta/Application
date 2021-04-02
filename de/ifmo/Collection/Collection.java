@@ -2,7 +2,7 @@ package de.ifmo.Collection;
 
 import de.ifmo.Commands.ConsoleCommands;
 import de.ifmo.Commands.ElementCommands;
-import de.ifmo.Commands.InfoCommands;
+import de.ifmo.Commands.ManufactureCommands;
 import de.ifmo.Product.Product;
 
 import java.io.*;
@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.util.Hashtable;
 import java.util.NoSuchElementException;
 
-public class Collection implements InfoCommands, ConsoleCommands, ElementCommands
+public class Collection implements ConsoleCommands, ElementCommands, ManufactureCommands
 {
     private Hashtable<Integer, Product> hashtable;
     private final java.time.LocalDate createDate;
@@ -22,30 +22,7 @@ public class Collection implements InfoCommands, ConsoleCommands, ElementCommand
     }
 
     public Hashtable<Integer, Product> getHashtable() { return this.hashtable; }
-
-    @Override
-    public boolean help()
-    {
-        File file = new File("\\help.txt"); /// need to change path!
-        try (BufferedReader br = new BufferedReader(new FileReader(file)))
-        {
-            String line;
-            while ((line = br.readLine()) != null) System.out.println(line);
-            return true;
-        } catch (IOException e) { System.out.println("File 'help' not found!"); }
-        return false;
-    }
-
-    @Override
-    public void info()
-    {
-        System.out.println("Type of collection: Hashtable");
-        System.out.println("Initialization date: " + this.createDate.toString());
-        System.out.println("Size of collection: " + getHashtable().size());
-    }
-
-    @Override
-    public void show() { System.out.println(getHashtable().toString()); }
+    public LocalDate getCreateDate() { return createDate; }
 
     @Override
     public void clear()
@@ -112,5 +89,40 @@ public class Collection implements InfoCommands, ConsoleCommands, ElementCommand
             return true;
         } catch (NoSuchElementException e) { System.out.println("There is no elements with such key!"); }
         return false;
+    }
+
+    @Override
+    public Integer averageOfManufactureCost()
+    {
+        Integer avg = 0;
+        for (Product p : getHashtable().values())
+        {
+            avg += p.getManufactureCost();
+        }
+        return avg / getHashtable().size();
+    }
+
+    @Override
+    public Product maxByManufacturer()
+    {
+        Product p_max = null;
+        for (Product p : getHashtable().values())
+        {
+            if (p_max == null || p_max.getManufacturer().getEmployeesCount() < p.getManufacturer().getEmployeesCount())
+                p_max = p;
+        }
+        return p_max;
+    }
+
+    @Override
+    public Integer countLessThanManufactureCost(Integer manufactureCost)
+    {
+        Integer count = 0;
+        for (Product p : getHashtable().values())
+        {
+            if (p.getManufactureCost() < manufactureCost)
+                count++;
+        }
+        return count;
     }
 }

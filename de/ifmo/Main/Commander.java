@@ -1,6 +1,7 @@
 package de.ifmo.Main;
 
 import de.ifmo.Collection.Collection;
+import de.ifmo.Collection.Printable;
 import de.ifmo.Commands.ConsoleCommands;
 import de.ifmo.Commands.ReplaceCommands;
 import de.ifmo.Organization.Address;
@@ -46,6 +47,23 @@ public class Commander implements ConsoleCommands, ReplaceCommands
         }
     }
 
+    // In progress!!!
+    public void fillCollection() throws IOException
+    {
+        InputStreamReader input = new InputStreamReader(new FileInputStream(new File(fileName)));
+        StringBuilder temp;
+        Integer count;
+        while (input.read() != -1)
+        {
+            temp = new StringBuilder();
+            count = 0;
+            while (input.read() != '\n' || input.read() != ',')
+            {
+                temp.append(input.read());
+            }
+        }
+    }
+
     public Product initializeProduct(BufferedReader br, Product p)
     {
         String[] param;
@@ -53,7 +71,7 @@ public class Commander implements ConsoleCommands, ReplaceCommands
         while(true) {
             try {
                 System.out.println("Enter the x-y coordinates:");
-                param = br.readLine().split(" ", -1);
+                param = br.readLine().split("\\s+");
                 Coordinates c = new Coordinates(Integer.parseInt(param[0]), Float.valueOf(param[1]));
                 p.setCoordinates(c);
                 break;
@@ -87,7 +105,7 @@ public class Commander implements ConsoleCommands, ReplaceCommands
         while(true) {
             try {
                 System.out.println("Enter the organization name and number of employments:");
-                param = br.readLine().split(" ", -1);
+                param = br.readLine().split("\\s+");
                 Organization org = new Organization(param[0], Integer.parseInt(param[1]));
 
                 System.out.println("Enter the organization type. The possible variants are: " + Arrays.toString(OrganizationType.values()));
@@ -103,32 +121,38 @@ public class Commander implements ConsoleCommands, ReplaceCommands
         return p;
     }
 
-    public void workspace(Collection collection) throws IOException
+    public void workspace(Collection collection, Integer recursion_count, String commandFile) throws IOException
     {
         String[] commandLine = {""};
         boolean noExceptions;
+        Printable printable = new Printable();
+
         while(!commandLine[0].equals("exit"))
         {
-            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+            BufferedReader br;
+            if (commandFile.equals(""))
+                br = new BufferedReader(new InputStreamReader(System.in));
+            else
+                br = new BufferedReader(new FileReader(commandFile));
             String command = br.readLine();
-            commandLine = command.split(" ",-1);
+            commandLine = command.split("\\s+");
             switch (commandLine[0]) {
                 case "help":
-                    noExceptions = collection.help();
-                    if(noExceptions) addCommandToLog(commandLine[0]);
+                    printable.help();
+                    addCommandToLog(commandLine[0]);
                 case "info":
                 {
-                    collection.info();
+                    printable.info(collection);
                     addCommandToLog(commandLine[0]);
                 }
                 case "show":
                 {
-                    collection.show();
+                    printable.show(collection);
                     addCommandToLog(commandLine[0]);
                 }
                 case "clear":
                 {
-                    collection.show();
+                    collection.clear();
                     addCommandToLog(commandLine[0]);
                 }
                 case "save":
@@ -182,6 +206,41 @@ public class Commander implements ConsoleCommands, ReplaceCommands
                     p = initializeProduct(br, p);
                     replaceIfLower(collection, key, p);
                 }
+                case "average_of_manufacture_cost":
+                {
+                    if (collection.getHashtable().size() > 0)
+                    {
+                        System.out.println(collection.averageOfManufactureCost());
+                    }
+                    else
+                        System.out.println("The collection is empty! Please, add the elements!");
+                }
+                case "max_by_manufacturer":
+                {
+                    if (collection.getHashtable().size() > 0)
+                    {
+                        Product p_max = collection.maxByManufacturer();
+                        printable.printProduct(p_max);
+                    }
+                    else
+                        System.out.println("The collection is empty! Please, add the elements!");
+                }
+                case "count_less_than_manufacture_cost":
+                {
+                    if (collection.getHashtable().size() > 0)
+                    {
+                        System.out.println(collection.countLessThanManufactureCost(Integer.valueOf(commandLine[1])));
+                    }
+                    else
+                        System.out.println("The collection is empty! Please, add the elements!");
+                }
+                case "execute_script":
+                {
+                    if (recursion_count < 20)
+                        this.workspace(collection, recursion_count++, commandLine[1]);
+                    else
+                        System.out.println("The free number of recursion is ended! For more recursions, please donate :)");
+                }
             }
         }
     }
@@ -202,7 +261,12 @@ public class Commander implements ConsoleCommands, ReplaceCommands
             Product target = collection.getHashtable().get(key);
             if (target == null) throw new NoSuchElementException("There is no elements with such key!");
             else if (target.getPrice() < p.getPrice())
+            {
                 collection.getHashtable().replace(key, target, p);
+                System.out.println("The element was replaced successfully!");
+            }
+            else
+                System.out.println("The current element has greater value!");
             return true;
         } catch(NoSuchElementException e) { System.out.println(e.getMessage()); }
         return false;
@@ -215,7 +279,12 @@ public class Commander implements ConsoleCommands, ReplaceCommands
             Product target = collection.getHashtable().get(key);
             if (target == null) throw new NoSuchElementException("There is no elements with such key!");
             else if (target.getPrice() > p.getPrice())
+            {
                 collection.getHashtable().replace(key,target,p);
+                System.out.println("The element was replaced successfully!");
+            }
+            else
+                System.out.println("The current element has lower value!");
             return true;
         } catch(NoSuchElementException e) { System.out.println(e.getMessage()); }
         return false;
