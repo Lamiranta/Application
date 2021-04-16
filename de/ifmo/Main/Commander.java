@@ -15,62 +15,107 @@ import java.io.*;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 
+/**
+ * The class of commander is used as a main class for work with user-defined collections.
+ * The commander contains the methods that allow to user to change the structure of collection and parameters inside its values.
+ * While working with collection user can through commander saves the changes to the file that was chosen
+ * at the beginning of the work session.
+ */
 public class Commander implements ConsoleCommands, ReplaceCommands
 {
     private String[] commandLog;
     private final String fileName;
 
+    /**
+     * Constructs a commander and gets access to the file with initial collection.
+     * @param fileName commander-used file
+     */
     public Commander(String fileName)
     {
-        this.commandLog = new String[14];
+        this.commandLog = new String[0];
         this.fileName = fileName;
     }
 
+    /**
+     * Adds last entered command to the command log.
+     * @param command last entered command
+     */
     public void addCommandToLog(String command)
     {
-        boolean isSaved = false;
-        for (int i = 0; i < 13; ++i)
+        int length = this.commandLog.length;
+        String[] temp;
+        if (length < 14)
         {
-            if (this.commandLog[i].equals(""))
-            {
-                this.commandLog[i] = command;
-                isSaved = true;
-                break;
-            }
+            temp = new String[length + 1];
+            if (length > 0) System.arraycopy(commandLog, 0, temp, 0, length);
+            temp[length] = command;
         }
-        if (!isSaved)
+        else
         {
-            String[] temp = new String[14];
+            temp = new String[14];
             System.arraycopy(commandLog, 1, temp, 0, 13);
             temp[13] = command;
-            this.commandLog = temp;
         }
+        this.commandLog = temp;
     }
 
-    // In progress!!!
-    public void fillCollection() throws IOException
+    /**
+     * Fills the collection that was defined by user in commander-used file.
+     * @param collection the user-defined collection
+     * @throws IOException if there is an error while initializing the reader
+     */
+    public void fillCollection(Collection collection) throws IOException
     {
         InputStreamReader input = new InputStreamReader(new FileInputStream(new File(fileName)));
         StringBuilder temp;
-        Integer count;
-        while (input.read() != -1)
-        {
+        String helpingTemp = "";
+        Product p = new Product();
+        int count = 0, key_count = 0, c;
+        do {
             temp = new StringBuilder();
-            count = 0;
-            while (input.read() != '\n' || input.read() != ',')
-            {
-                temp.append(input.read());
+            do {
+                c = input.read();
+                if (c == (int) ',' || c == (int) '\n' || c == -1) { count++; break; }
+                else
+                    temp.append(Character.toChars(c));
+            } while (true);
+
+            if (count == 1) p = new Product();
+
+            switch (count) {
+                case 1 -> p.setName(temp.toString());
+                case 2, 7 -> helpingTemp = temp.toString();
+                case 3 -> p.setCoordinates(new Coordinates(Long.parseLong(helpingTemp), Float.parseFloat(temp.toString())));
+                case 4 -> p.setPrice(Float.parseFloat(temp.toString()));
+                case 5 -> p.setManufactureCost(Integer.parseInt(temp.toString()));
+                case 6 -> p.setUnitOfMeasure(UnitOfMeasure.valueOf(temp.toString()));
+                case 8 -> p.setManufacturer(new Organization(helpingTemp, Integer.parseInt(temp.toString())));
+                case 9 -> p.getManufacturer().setType(OrganizationType.valueOf(temp.toString()));
+                case 10 -> p.getManufacturer().setPostalAddress(new Address(temp.toString()));
             }
-        }
+            if (c == (int) '\n' || c == -1)
+            {
+                collection.getHashtable().put("key_" + key_count, p);
+                count = 0;
+                key_count++;
+            }
+        } while (c != -1);
     }
 
+    /**
+     * Initializes the new product defined by user through command prompt.
+     * @param br reader that used to read line entered in command prompt
+     * @param p product that used for storing the information about user-defined product
+     * @return product defined by user
+     */
     public Product initializeProduct(BufferedReader br, Product p)
     {
         String[] param;
 
         while(true) {
             try {
-                System.out.println("Enter the x-y coordinates:");
+                System.out.print("Enter the coordinates. ");
+                System.out.println("The value of x must be an integer, the value of y must be less than 262:");
                 param = br.readLine().split("\\s+");
                 Coordinates c = new Coordinates(Integer.parseInt(param[0]), Float.valueOf(param[1]));
                 p.setCoordinates(c);
@@ -88,7 +133,7 @@ public class Commander implements ConsoleCommands, ReplaceCommands
 
         while(true) {
             try {
-                System.out.println("Enter the manufacture cost:");
+                System.out.println("Enter the manufacture cost. The value of manufacture cost must be an integer:");
                 p.setManufactureCost(Integer.parseInt(br.readLine()));
                 break;
             } catch(Exception e) { System.out.println(e.getMessage()); }
@@ -96,7 +141,8 @@ public class Commander implements ConsoleCommands, ReplaceCommands
 
         while(true) {
             try {
-                System.out.println("Enter the unit of measure. The possible variants are: " + Arrays.toString(UnitOfMeasure.values()));
+                System.out.print("Enter the unit of measure. The possible variants are: ");
+                System.out.println(Arrays.toString(UnitOfMeasure.values()));
                 p.setUnitOfMeasure(UnitOfMeasure.valueOf(br.readLine()));
                 break;
             } catch(Exception e) { System.out.println(e.getMessage()); }
@@ -108,7 +154,8 @@ public class Commander implements ConsoleCommands, ReplaceCommands
                 param = br.readLine().split("\\s+");
                 Organization org = new Organization(param[0], Integer.parseInt(param[1]));
 
-                System.out.println("Enter the organization type. The possible variants are: " + Arrays.toString(OrganizationType.values()));
+                System.out.print("Enter the organization type. The possible variants are: ");
+                System.out.println(Arrays.toString(OrganizationType.values()));
                 org.setType(OrganizationType.valueOf(br.readLine()));
 
                 System.out.println("Enter the postal address:");
@@ -121,126 +168,175 @@ public class Commander implements ConsoleCommands, ReplaceCommands
         return p;
     }
 
+    /**
+     * Initializes the new product defined by user through script file.
+     * The method is used when command "insert" is called in script file.
+     * @param br reader that used to read line in script file
+     * @param p product that used for storing the information about user-defined product
+     * @return product defined by user
+     */
+    public Product initializeProductThroughScript(BufferedReader br, Product p)
+    {
+        String[] param;
+
+        try {
+            param = br.readLine().split("\\s+");
+            Coordinates c = new Coordinates(Integer.parseInt(param[0]), Float.valueOf(param[1]));
+            p.setCoordinates(c);
+
+            p.setPrice(Float.parseFloat(br.readLine()));
+
+            p.setManufactureCost(Integer.parseInt(br.readLine()));
+
+            p.setUnitOfMeasure(UnitOfMeasure.valueOf(br.readLine()));
+
+            param = br.readLine().split("\\s+");
+            Organization org = new Organization(param[0], Integer.parseInt(param[1]));
+
+            org.setType(OrganizationType.valueOf(br.readLine()));
+
+            org.setPostalAddress(new Address(br.readLine()));
+
+            p.setManufacturer(org);
+        } catch(Exception e) { System.out.println(e.getMessage()); }
+
+        return p;
+    }
+
+    /**
+     * The main method used as a workspace while working through command prompt.
+     * It is used for entering commands and calling corresponding methods.
+     * @param collection the user-defined collection with which the commander works
+     * @param recursion_count count the number of "execute_script" commands that were entered
+     * @param commandFile file used for reading commands while "execute_script" is active
+     * @throws IOException if there is an error while initializing the reader
+     */
     public void workspace(Collection collection, Integer recursion_count, String commandFile) throws IOException
     {
         String[] commandLine = {""};
-        boolean noExceptions;
         Printable printable = new Printable();
+        BufferedReader br;
+        if (commandFile.equals(""))
+            br = new BufferedReader(new InputStreamReader(System.in));
+        else
+        {
+            try {
+                br = new BufferedReader(new FileReader(commandFile));
+            } catch (IOException e) {
+                System.out.println("Incorrect name of file!");
+                return;
+            }
+        }
 
         while(!commandLine[0].equals("exit"))
         {
-            BufferedReader br;
-            if (commandFile.equals(""))
-                br = new BufferedReader(new InputStreamReader(System.in));
-            else
-                br = new BufferedReader(new FileReader(commandFile));
-            String command = br.readLine();
-            commandLine = command.split("\\s+");
+            String command;
+            if ((command = br.readLine()) == null)
+                return;
+            else commandLine = command.split("\\s+");
+
             switch (commandLine[0]) {
-                case "help":
+                case "help" -> {
                     printable.help();
                     addCommandToLog(commandLine[0]);
-                case "info":
-                {
+                }
+                case "info" -> {
                     printable.info(collection);
                     addCommandToLog(commandLine[0]);
                 }
-                case "show":
-                {
+                case "show" -> {
                     printable.show(collection);
                     addCommandToLog(commandLine[0]);
                 }
-                case "clear":
-                {
+                case "clear" -> {
                     collection.clear();
                     addCommandToLog(commandLine[0]);
                 }
-                case "save":
-                    noExceptions = collection.save(new File(this.fileName));
-                    if(noExceptions) addCommandToLog(commandLine[0]);
-                case "history":
-                {
+                case "save" -> { if (collection.save(new File(this.fileName))) addCommandToLog(commandLine[0]); }
+                case "history" -> {
                     this.history();
                     addCommandToLog(commandLine[0]);
                 }
-                case "insert":
-                {
+                case "insert" -> {
                     Product p = new Product();
-                    Integer key = Integer.valueOf(commandLine[1]);
+                    String key = commandLine[1];
                     String name = commandLine[2];
                     p.setName(name);
-                    p = initializeProduct(br, p);
-                    collection.insert(key, p);
+                    if (commandFile.equals("") && collection.checkKeyExistence(key))
+                        p = initializeProduct(br, p);
+                    else p = initializeProductThroughScript(br, p);
+
+                    if (collection.checkKeyExistence(key))
+                    {
+                        collection.insert(key, p);
+                        System.out.println("The product was successful inserted!");
+                    } else System.out.println("The product with such key is already existed!");
                     addCommandToLog(commandLine[0]);
                 }
-                case "update":
-                {
+                case "update" -> {
                     Integer id = Integer.valueOf(commandLine[1]);
                     Product pUpd = new Product();
                     String name = commandLine[2];
                     pUpd.setName(name);
                     pUpd = initializeProduct(br, pUpd);
-                    noExceptions = collection.updateId(id, pUpd);
-                    if(noExceptions) addCommandToLog(commandLine[0]);
+                    if (collection.updateId(id, pUpd))
+                        addCommandToLog(commandLine[0]);
                 }
-                case "remove_key":
-                {
-                    noExceptions = collection.removeKey(Integer.valueOf(commandLine[1]));
-                    if(noExceptions) addCommandToLog(commandLine[0]);
+                case "remove_key" -> {
+                    if (collection.removeKey(commandLine[1]))
+                        addCommandToLog(commandLine[0]);
                 }
-                case "replace_if_greater":
-                {
-                    Integer key = Integer.valueOf(commandLine[1]);
+                case "replace_if_greater" -> {
+                    String key = commandLine[1];
                     Product p = new Product();
                     String name = commandLine[2];
                     p.setName(name);
                     p = initializeProduct(br, p);
-                    replaceIfGreater(collection, key, p);
+                    if (replaceIfGreater(collection, key, p))
+                        addCommandToLog(commandLine[0]);
                 }
-                case "replace_if_lower":
-                {
-                    Integer key = Integer.valueOf(commandLine[1]);
+                case "replace_if_lower" -> {
+                    String key = commandLine[1];
                     Product p = new Product();
                     String name = commandLine[2];
                     p.setName(name);
                     p = initializeProduct(br, p);
-                    replaceIfLower(collection, key, p);
+                    if (replaceIfLower(collection, key, p))
+                        addCommandToLog(commandLine[0]);
                 }
-                case "average_of_manufacture_cost":
-                {
+                case "average_of_manufacture_cost" -> {
                     if (collection.getHashtable().size() > 0)
-                    {
                         System.out.println(collection.averageOfManufactureCost());
-                    }
                     else
                         System.out.println("The collection is empty! Please, add the elements!");
+                    addCommandToLog(commandLine[0]);
                 }
-                case "max_by_manufacturer":
-                {
-                    if (collection.getHashtable().size() > 0)
-                    {
+                case "max_by_manufacturer" -> {
+                    if (collection.getHashtable().size() > 0) {
                         Product p_max = collection.maxByManufacturer();
                         printable.printProduct(p_max);
-                    }
-                    else
+                    } else
                         System.out.println("The collection is empty! Please, add the elements!");
+                    addCommandToLog(commandLine[0]);
                 }
-                case "count_less_than_manufacture_cost":
-                {
-                    if (collection.getHashtable().size() > 0)
-                    {
+                case "count_less_than_manufacture_cost" -> {
+                    if (collection.getHashtable().size() > 0) {
                         System.out.println(collection.countLessThanManufactureCost(Integer.valueOf(commandLine[1])));
+                    } else
+                        System.out.println("The collection is empty! Please, add the elements!");
+                    addCommandToLog(commandLine[0]);
+                }
+                case "execute_script" -> {
+                    if (recursion_count < 10)
+                    {
+                        addCommandToLog(commandLine[0]);
+                        this.workspace(collection, recursion_count + 1, commandLine[1]);
                     }
                     else
-                        System.out.println("The collection is empty! Please, add the elements!");
+                        System.out.println("The free trial of recursions is ended! For more recursions, please donate!");
                 }
-                case "execute_script":
-                {
-                    if (recursion_count < 20)
-                        this.workspace(collection, recursion_count++, commandLine[1]);
-                    else
-                        System.out.println("The free number of recursion is ended! For more recursions, please donate :)");
-                }
+                case "exit" -> {}
+                default -> System.out.println("There is no such command! Try to type 'help' for more information!");
             }
         }
     }
@@ -251,11 +347,23 @@ public class Commander implements ConsoleCommands, ReplaceCommands
     @Override
     public boolean save(File file) { return false; }
 
+    /**
+     * Returns the command log containing the last 14 entered commands.
+     * They could be written by user either in command prompt or in script file.
+     */
     @Override
     public void history() { System.out.println(Arrays.toString(commandLog)); }
 
+    /**
+     * If there is a value to specified key in this collection, attempts to replace it, when the new value is greater.
+     * @param collection the user-defined collection
+     * @param key the specified key
+     * @param p the replacing product
+     * @return true if the product was successful replaced
+     * @throws NoSuchElementException if there is no associated value
+     */
     @Override
-    public boolean replaceIfGreater(Collection collection, Integer key, Product p) throws NoSuchElementException
+    public boolean replaceIfGreater(Collection collection, String key, Product p) throws NoSuchElementException
     {
         try {
             Product target = collection.getHashtable().get(key);
@@ -272,8 +380,16 @@ public class Commander implements ConsoleCommands, ReplaceCommands
         return false;
     }
 
+    /**
+     * If there is a value to specified key in this collection, attempts to replace it, when the new value is lower.
+     * @param collection the user-defined collection
+     * @param key the specified key
+     * @param p the replacing product
+     * @return true if the product was successful replaced
+     * @throws NoSuchElementException if there is no associated value
+     */
     @Override
-    public boolean replaceIfLower(Collection collection, Integer key, Product p) throws NoSuchElementException
+    public boolean replaceIfLower(Collection collection, String key, Product p) throws NoSuchElementException
     {
         try {
             Product target = collection.getHashtable().get(key);

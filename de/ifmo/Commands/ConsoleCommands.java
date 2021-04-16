@@ -4,7 +4,7 @@ import java.io.File;
 
 public interface ConsoleCommands
 {
-    public void clear();
-    public boolean save(File file);
-    public void history();
+    void clear();
+    boolean save(File file);
+    void history();
 }

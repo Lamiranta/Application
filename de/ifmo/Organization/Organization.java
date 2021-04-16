@@ -14,6 +14,7 @@ public class Organization
     {
         setName(name);
         setEmployeesCount(employeesCount);
+        this.id = Math.abs(name.hashCode());
     }
 
     public int getId() { return this.id; }

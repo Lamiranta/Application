@@ -5,6 +5,6 @@ import de.ifmo.Product.Product;
 
 public interface ReplaceCommands
 {
-    public boolean replaceIfGreater(Collection collection, Integer key, Product p);
-    public boolean replaceIfLower(Collection collection, Integer key, Product p);
+    boolean replaceIfGreater(Collection collection, String key, Product p);
+    boolean replaceIfLower(Collection collection, String key, Product p);
 }

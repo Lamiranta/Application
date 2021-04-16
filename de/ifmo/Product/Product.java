@@ -18,7 +18,7 @@ public class Product
     public Product()
     {
         this.creationDate = LocalDate.now();
-        this.id = creationDate.hashCode();
+        this.id = (int) Math.floor(1e9 * Math.random());
     }
 
     public Integer getId() { return this.id; }

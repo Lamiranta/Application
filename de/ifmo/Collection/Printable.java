@@ -3,10 +3,20 @@ package de.ifmo.Collection;
 import de.ifmo.Commands.InfoCommands;
 import de.ifmo.Product.Product;
 
+/**
+ * This class is used as storage for methods returning the specified information of collection as a text in console.
+ */
 public class Printable implements InfoCommands
 {
+    /**
+     * Constructs a new object of class Printable
+     */
     public Printable() {}
 
+    /**
+     * Prints the specified product from collection.
+     * @param p the specified product
+     */
     public void printProduct(Product p)
     {
         System.out.println("Product ID: " + p.getId().toString());
@@ -14,11 +24,14 @@ public class Printable implements InfoCommands
         System.out.println("Creation date: " + p.getCreationDate().toString());
         System.out.println("Price: " + p.getPrice().toString());
         System.out.println("Coordinates: " + p.getCoordinates().getX() + " " + p.getCoordinates().getY().toString());
-        System.out.println("Manufacturer: " + p.getManufacturer().getName());
+        System.out.println("Manufacturer: " + p.getManufacturer().getId() + " " + p.getManufacturer().getName());
         System.out.println("Manufacture cost: " + p.getManufactureCost().toString());
         System.out.println("Unit of measure: " + p.getUnitOfMeasure().toString());
     }
 
+    /**
+     * Prints the information about available commands.
+     */
     @Override
     public void help()
     {
@@ -40,17 +53,35 @@ public class Printable implements InfoCommands
         System.out.println("count_less_than_manufacture_cost manufactureCost - show number of elements with lower value of manufactureCost field than for the given");
     }
 
+    /**
+     * Prints the information about specified collection.
+     * @param collection the specified collection
+     */
     @Override
     public void info(Collection collection)
     {
         System.out.println("Collection type: Hashtable<String, Product>");
-        System.out.println("Create date: " + collection.getCreateDate().toString());
+        System.out.println("Creation date: " + collection.getCreateDate().toString());
         System.out.println("Collection size: " + collection.getHashtable().size());
     }
 
+    /**
+     * Prints all elements containing in the collection in format "key -> id, name".
+     * @param collection the specified collection
+     */
     @Override
     public void show(Collection collection)
     {
-        System.out.println(collection.getHashtable().values().toString());
+        if (collection.getHashtable().size() == 0)
+        {
+            System.out.println("Collection is empty!");
+            return;
+        }
+        System.out.println("key_value -> Product_id, Product_name");
+        for (String key : collection.sortedHashtable())
+        {
+            System.out.print(key + " -> ");
+            System.out.println(collection.getHashtable().get(key).getId() + ", " + collection.getHashtable().get(key).getName());
+        }
     }
 }
