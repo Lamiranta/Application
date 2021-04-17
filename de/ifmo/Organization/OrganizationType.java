@@ -1,5 +1,8 @@
 package de.ifmo.Organization;
 
+/**
+ * List of possible organization types.
+ */
 public enum OrganizationType
 {
     COMMERCIAL,

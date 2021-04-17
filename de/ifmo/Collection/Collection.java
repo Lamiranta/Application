@@ -16,7 +16,13 @@ import java.util.*;
  */
 public class Collection implements ConsoleCommands, ElementCommands, ManufactureCommands
 {
+    /**
+     * The main storage of elements of specific collection. Each specific key is mapped to specific product defined by
+     * user through initial file, script file or "insert"-command in command prompt.
+     * The keys are contained in string format that allows to user to define specific comfortable key to each product.
+     */
     private Hashtable<String, Product> hashtable;
+    /** Creation date of the collection. It is filled when the collection was constructed automatically. */
     private final java.time.LocalDate createDate;
 
     /**

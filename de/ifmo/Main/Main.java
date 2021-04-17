@@ -9,7 +9,7 @@ public class Main
     public static void main(String[] args)
     {
         try {
-            String fileName = System.getenv("fileName");  /// Fuck this program!!!
+            String fileName = System.getenv("fileName");
             String[] temp = fileName.split("\\.");
             if (fileName.equals("") || !temp[1].equals("csv") || temp.length > 2)
                 throw new FileNotFoundException("The name of your file is invalid!");

@@ -23,7 +23,9 @@ import java.util.NoSuchElementException;
  */
 public class Commander implements ConsoleCommands, ReplaceCommands
 {
+    /** Command log contained last 14 commands entered by user. */
     private String[] commandLog;
+    /** Initial file name defined by user. */
     private final String fileName;
 
     /**

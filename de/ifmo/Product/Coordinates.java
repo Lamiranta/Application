@@ -2,11 +2,21 @@ package de.ifmo.Product;
 
 import org.w3c.dom.ranges.RangeException;
 
+/**
+ * This class contains the information about the coordinates of specific product.
+ */
 public class Coordinates
 {
+    /** The x-coordinate of specific product. */
     private long x;
+    /** The y-coordinate of specific product. The value cannot be greater than 261. */
     private Float y;
 
+    /**
+     * Constructs a new object of this class and sets specific coordinates to it.
+     * @param x specific x-coordinate
+     * @param y specific y-coordinate
+     */
     public Coordinates(long x, Float y)
     {
         setX(x);

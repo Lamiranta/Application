@@ -4,17 +4,33 @@ import de.ifmo.Organization.Organization;
 
 import java.time.LocalDate;
 
+/**
+ * This class stores the information about specific product including the classes Coordinates and Organization.
+ * Objects of this class are used as the elements of user collection. The changes user can do are made through access to
+ * the specific Product-object, whenever it is sufficient to work with fields of Coordinates or Organization.
+ */
 public class Product
 {
+    /** Id of specific product. This field is unique and generated automatically. */
     private Integer id;
+    /** Name of specific product. */
     private String name;
+    /** Coordinates of specific product. This class contains x- and y-coordinate. */
     private Coordinates coordinates;
+    /** Creation date of specific product. It is filled when the object was constructed automatically. */
     private java.time.LocalDate creationDate;
+    /** Price of specific product. */
     private Float price;
+    /** Manufacture cost of specific product. */
     private Integer manufactureCost;
+    /** Unit of measure used for specific product. */
     private UnitOfMeasure unitOfMeasure;
+    /** Organization that manufacturing specific product. */
     private Organization manufacturer;
 
+    /**
+     * Constructs a new object of this class and fills creationDate and id fields.
+     */
     public Product()
     {
         this.creationDate = LocalDate.now();
