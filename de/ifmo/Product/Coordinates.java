@@ -2,10 +2,12 @@ package de.ifmo.Product;
 
 import org.w3c.dom.ranges.RangeException;
 
+import java.io.Serializable;
+
 /**
  * This class contains the information about the coordinates of specific product.
  */
-public class Coordinates
+public class Coordinates implements Serializable
 {
     /** The x-coordinate of specific product. */
     private long x;

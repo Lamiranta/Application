@@ -1,7 +1,6 @@
 package de.ifmo.Product;
 
-import de.ifmo.Organization.Organization;
-
+import java.io.Serializable;
 import java.time.LocalDate;
 
 /**
@@ -9,7 +8,7 @@ import java.time.LocalDate;
  * Objects of this class are used as the elements of user collection. The changes user can do are made through access to
  * the specific Product-object, whenever it is sufficient to work with fields of Coordinates or Organization.
  */
-public class Product
+public class Product implements Serializable
 {
     /** Id of specific product. This field is unique and generated automatically. */
     private Integer id;

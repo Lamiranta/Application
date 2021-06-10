@@ -1,11 +1,10 @@
 package de.ifmo.Collection;
 
-import de.ifmo.Commands.ConsoleCommands;
-import de.ifmo.Commands.ElementCommands;
-import de.ifmo.Commands.ManufactureCommands;
+import de.ifmo.Interface.ElementCommands;
+import de.ifmo.Interface.ManufactureCommands;
+import de.ifmo.Interface.ReplaceCommands;
 import de.ifmo.Product.Product;
 
-import java.io.*;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -14,7 +13,7 @@ import java.util.*;
  * Also there are methods which are used for working with collection in real-time.
  * As a storage of user-defined elements is hashtable used.
  */
-public class Collection implements ConsoleCommands, ElementCommands, ManufactureCommands
+public class Collection implements ElementCommands, ManufactureCommands, ReplaceCommands
 {
     /**
      * The main storage of elements of specific collection. Each specific key is mapped to specific product defined by
@@ -56,47 +55,17 @@ public class Collection implements ConsoleCommands, ElementCommands, Manufacture
     public boolean checkKeyExistence(String key)
     {
         Product p = getHashtable().get(key);
-        return p == null;
+        return p != null;
     }
 
     /**
      * Clears the hashtable of this collection.
      */
-    @Override
-    public void clear()
+    public String clear()
     {
         getHashtable().clear();
-        System.out.println("The collection was cleared successful!");
+        return "The collection was cleared successful!";
     }
-
-    /**
-     * Saves this collection to the chosen file.
-     *
-     * @param file user-defined file
-     * @return true if saving was successful done
-     */
-    @Override
-    public boolean save(File file)
-    {
-        try {
-            FileOutputStream fileOutputStream = new FileOutputStream(file);
-            for (Product p : getHashtable().values())
-            {
-                String temp = p.getName() + "," + p.getCoordinates().getX() + "," + p.getCoordinates().getY() + ",";
-                temp += p.getPrice() + "," + p.getManufactureCost() + "," + p.getUnitOfMeasure() + ",";
-                temp += p.getManufacturer().getName() + "," + p.getManufacturer().getEmployeesCount() + ",";
-                temp += p.getManufacturer().getType() + "," + p.getManufacturer().getPostalAddress().getZipCode() + "\n";
-                byte[] translate = temp.getBytes();
-                fileOutputStream.write(translate);
-            }
-            System.out.println("File was saved successful!");
-            return true;
-        } catch (IOException e) { System.out.println("Error while writing the file!"); }
-        return false;
-    }
-
-    @Override
-    public void history() {}
 
     /**
      * If the value of specified key is not contained, attempts to insert to this collection a new user-defined product.
@@ -104,7 +73,15 @@ public class Collection implements ConsoleCommands, ElementCommands, Manufacture
      * @param product user-defined product
      */
     @Override
-    public void insert(String key, Product product) { getHashtable().put(key,product); }
+    public String insert(String key, Product product)
+    {
+        if (!checkKeyExistence(key))
+        {
+            getHashtable().put(key, product);
+            return "The product was successful inserted!";
+        }
+        else return "There exists an element with such key!";
+    }
 
     /**
      * If there is a product with specified id, attempts to update its value.
@@ -113,7 +90,7 @@ public class Collection implements ConsoleCommands, ElementCommands, Manufacture
      * @return true if the product was successful updated
      */
     @Override
-    public boolean updateId(Integer id, Product product)
+    public String updateId(Integer id, Product product)
     {
         boolean doesExist = false;
         for (String key : getHashtable().keySet())
@@ -126,11 +103,9 @@ public class Collection implements ConsoleCommands, ElementCommands, Manufacture
         }
         if (doesExist)
         {
-            System.out.println("The element was successful updated!");
-            return true;
+            return "The element was successful updated!";
         }
-        else System.out.println("There is no elements with such id!");
-        return false;
+        else return "There is no elements with such id!";
     }
 
     /**
@@ -140,16 +115,15 @@ public class Collection implements ConsoleCommands, ElementCommands, Manufacture
      * @throws NoSuchElementException if there is no element associated with this key
      */
     @Override
-    public boolean removeKey(String key) throws NoSuchElementException
+    public String removeKey(String key) throws NoSuchElementException
     {
         try {
             if (getHashtable().get(key) == null)
                 throw new NoSuchElementException();
             else getHashtable().remove(key);
-            System.out.println("The element was successful removed!");
-            return true;
-        } catch (NoSuchElementException e) { System.out.println("There is no elements with such key!"); }
-        return false;
+            return "The element was successful removed!";
+        } catch (NoSuchElementException e) { e.printStackTrace(); }
+        return "There is no elements with such key!";
     }
 
     /**
@@ -198,5 +172,51 @@ public class Collection implements ConsoleCommands, ElementCommands, Manufacture
                 count++;
         }
         return count;
+    }
+
+    /**
+     * If there is a value to specified key in this collection, attempts to replace it, when the new value is greater.
+     * @param key the specified key
+     * @param p the replacing product
+     * @return true if the product was successful replaced
+     * @throws NoSuchElementException if there is no associated value
+     */
+    @Override
+    public String replaceIfGreater(String key, Product p) throws NoSuchElementException
+    {
+        try {
+            Product target = getHashtable().get(key);
+            if (target == null) throw new NoSuchElementException("There is no elements with such key!");
+            else if (target.getPrice() < p.getPrice())
+            {
+                getHashtable().replace(key, target, p);
+                return "The element was replaced successfully!";
+            }
+            else
+                return "The current element has greater value!";
+        } catch (NoSuchElementException e) { return e.getMessage(); }
+    }
+
+    /**
+     * If there is a value to specified key in this collection, attempts to replace it, when the new value is lower.
+     * @param key the specified key
+     * @param p the replacing product
+     * @return true if the product was successful replaced
+     * @throws NoSuchElementException if there is no associated value
+     */
+    @Override
+    public String replaceIfLower(String key, Product p) throws NoSuchElementException
+    {
+        try {
+            Product target = getHashtable().get(key);
+            if (target == null) throw new NoSuchElementException("There is no elements with such key!");
+            else if (target.getPrice() > p.getPrice())
+            {
+                getHashtable().replace(key, target, p);
+                return "The element was replaced successfully!";
+            }
+            else
+                return "The current element has greater value!";
+        } catch (NoSuchElementException e) { return e.getMessage(); }
     }
 }
